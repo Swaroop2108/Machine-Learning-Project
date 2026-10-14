@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WayVista — Smart Travel Time Predictor | Ridge & Lasso ML</title>
+    <meta name="description"
+        content="Predict your travel time and arrival ETA using Ridge and Lasso Machine Learning regression models.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Leaflet CSS for OpenStreetMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom Travel Styles -->
+    <link rel="stylesheet" href="./css/style.css?v=1.3.0">
+</head>
+
+<body>
+
+    <!-- Header Navbar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-plane-departure logo-icon"></i>
+                <span class="logo-text">WayVista<span class="logo-highlight"></span></span>
+            </a>
+            <!-- Logged-in Header Navigation -->
+            <nav class="nav-links" id="logged-in-nav" style="display: none;">
+                <a href="#" id="nav-link-dash" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="#" id="nav-link-plan"><i class="fa-solid fa-compass"></i> Plan Journey</a>
+                <a href="#" id="nav-link-trips"><i class="fa-solid fa-clock-rotate-left"></i> My Trips</a>
+                <a href="#" id="nav-link-profile"><i class="fa-solid fa-user"></i> Profile</a>
+                <button type="button" id="nav-link-logout" class="nav-logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </nav>
+            <!-- Logged-out Header Navigation -->
+            <nav class="nav-links" id="logged-out-nav">
+                <a href="#" onclick="showView('login')"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+                <a href="#" onclick="showView('register')" class="btn-nav-accent"><i class="fa-solid fa-user-plus"></i> Register</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero-section">
+        <div class="hero-content">
+            <span class="hero-subtitle"><i class="fa-solid fa-compass"></i> WayVista — Smart Travel Time Predictor</span>
+            <h1 class="hero-title">Plan Your Journey with <span class="gradient-text">Machine Learning</span></h1>
+            <p class="hero-description">
+                Know your estimated travel time before you go. WayVista calculates real-time distance, traffic density,
+                and origin weather to predict journey duration and arrival ETA.
+            </p>
+            <div class="feature-pills">
+                <span class="pill-item"><i class="fa-solid fa-route text-sky"></i> Road Distance</span>
+                <span class="pill-item"><i class="fa-solid fa-car-side text-amber"></i> Traffic Density</span>
+                <span class="pill-item"><i class="fa-solid fa-cloud-sun text-emerald"></i> Weather & Temp</span>
+                <span class="pill-item"><i class="fa-regular fa-clock text-indigo"></i> Departure Hour</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <!-- ==================================================
+             AUTHENTICATION & DASHBOARD VIEWS CONTAINER
+             ================================================== -->
+        <div id="auth-container">
+
+            <!-- 1. LOGIN CARD VIEW -->
+            <section id="login-card" class="card auth-card" style="display: none;">
+                <div class="auth-header">
+                    <i class="fa-solid fa-plane-departure auth-brand-icon"></i>
+                    <h2>WayVista</h2>
+                    <p class="auth-subtitle">Smart Travel • Smarter Journeys</p>
+                </div>
+
+                <div id="login-alert" class="auth-alert" style="display: none;"></div>
+
+                <form id="login-form" class="auth-form">
+                    <div class="input-group">
+                        <label for="login-email"><i class="fa-solid fa-envelope text-sky"></i> Email Address</label>
+                        <input type="email" id="login-email" placeholder="e.g. alex@example.com" required autocomplete="email">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="login-password"><i class="fa-solid fa-lock text-indigo"></i> Password</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" id="login-submit-btn" class="btn-primary btn-block">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                    </button>
+
+                    <div class="auth-footer-text">
+                        Don't have an account? <a href="#" id="link-to-register">Create Account</a>
+                    </div>
+                </form>
+            </section>
+
+            <!-- 2. REGISTER CARD VIEW -->
+            <section id="register-card" class="card auth-card" style="display: none;">
+                <div class="auth-header">
+                    <i class="fa-solid fa-user-plus auth-brand-icon"></i>
+                    <h2>Create your WayVista Account</h2>
+                    <p class="auth-subtitle">Start predicting journeys with machine learning</p>
+                </div>
+
+                <div id="register-alert" class="auth-alert" style="display: none;"></div>
+
+                <form id="register-form" class="auth-form">
+                    <div class="input-group">
+                        <label for="reg-name"><i class="fa-solid fa-user text-emerald"></i> Full Name</label>
+                        <input type="text" id="reg-name" placeholder="e.g. Alex Morgan" required autocomplete="name">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="reg-email"><i class="fa-solid fa-envelope text-sky"></i> Email Address</label>
+                        <input type="email" id="reg-email" placeholder="e.g. alex@example.com" required autocomplete="email">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="reg-password"><i class="fa-solid fa-lock text-indigo"></i> Password</label>
+                        <input type="password" id="reg-password" placeholder="Min 6 characters" required autocomplete="new-password">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="reg-confirm-password"><i class="fa-solid fa-shield-halved text-amber"></i> Confirm Password</label>
+                        <input type="password" id="reg-confirm-password" placeholder="Re-enter password" required autocomplete="new-password">
+                    </div>
+
+
+                    <button type="submit" id="reg-submit-btn" class="btn-primary btn-block">
+                        <i class="fa-solid fa-user-check"></i> Create Account
+                    </button>
+
+                    <div class="auth-footer-text">
+                        Already have an account? <a href="#" id="link-to-login">Log In</a>
+                    </div>
+                </form>
+            </section>
+
+            <!-- 3. EMAIL VERIFICATION CARD VIEW -->
+            <section id="verify-card" class="card auth-card" style="display: none;">
+                <div class="auth-header">
+                    <i class="fa-solid fa-envelope-circle-check auth-brand-icon text-emerald"></i>
+                    <h2>Verify Your Email</h2>
+                    <p class="auth-subtitle">We sent a 6-digit verification code to:</p>
+                    <div class="verify-email-badge" id="verify-email-display">user@example.com</div>
+                </div>
+
+                <div id="verify-alert" class="auth-alert" style="display: none;"></div>
+
+                <form id="verify-form" class="auth-form">
+                    <div class="input-group">
+                        <label for="verify-code"><i class="fa-solid fa-key text-amber"></i> Enter 6-Digit Verification Code</label>
+                        <input type="text" id="verify-code" placeholder="e.g. 482731" maxlength="6" pattern="[0-9]{6}" required autocomplete="one-time-code" style="text-align: center; font-size: 1.5rem; letter-spacing: 6px; font-weight: bold;">
+                    </div>
+
+                    <button type="submit" id="verify-submit-btn" class="btn-primary btn-block">
+                        <i class="fa-solid fa-circle-check"></i> Verify Email
+                    </button>
+
+                    <button type="button" id="resend-code-btn" class="btn-secondary btn-block" style="margin-top: 0.5rem;">
+                        <i class="fa-solid fa-rotate-right"></i> Resend Code
+                    </button>
+                </form>
+            </section>
+
+            <!-- 4. NEW WAYVISTA DASHBOARD CARD VIEW -->
+            <section id="dashboard-card" class="card dashboard-card" style="display: none;">
+                <div class="dash-welcome-header">
+                    <div>
+                        <h2 class="dash-title">WayVista Dashboard</h2>
+                        <h3 class="dash-greeting">Welcome, <span id="dash-user-name">Traveler</span> 👋</h3>
+                        <p class="dash-subtitle">Plan smarter journeys and navigate with confidence.</p>
+                    </div>
+                </div>
+
+                <!-- 4 Action Cards Grid -->
+                <div class="dash-cards-grid">
+                    
+                    <!-- Card 1: Plan Journey -->
+                    <div class="dash-action-card">
+                        <div class="card-icon-wrapper icon-blue">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <h3>📍 Plan Journey</h3>
+                        <p>Calculate route, distance, travel time and arrival ETA using ML models.</p>
+                        <button type="button" id="dash-card-plan-btn" class="btn-dash-action btn-blue">
+                            <i class="fa-solid fa-compass"></i> Plan a Journey
+                        </button>
+                    </div>
+
+                    <!-- Card 2: Navigation -->
+                    <div class="dash-action-card">
+                        <div class="card-icon-wrapper icon-emerald">
+                            <i class="fa-solid fa-compass"></i>
+                        </div>
+                        <h3>🧭 Navigation</h3>
+                        <p>Navigate from your current location to your destination with live turn guidance.</p>
+                        <button type="button" id="dash-card-nav-btn" class="btn-dash-action btn-emerald">
+                            <i class="fa-solid fa-location-arrow"></i> Start Navigation
+                        </button>
+                    </div>
+
+                    <!-- Card 3: My Trips -->
+                    <div class="dash-action-card">
+                        <div class="card-icon-wrapper icon-amber">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <h3>📊 My Trips</h3>
+                        <p>View your previous calculated journeys and route histories.</p>
+                        <button type="button" id="dash-card-trips-btn" class="btn-dash-action btn-amber">
+                            <i class="fa-solid fa-list-check"></i> View Trips
+                        </button>
+                    </div>
+
+                    <!-- Card 4: Profile -->
+                    <div class="dash-action-card">
+                        <div class="card-icon-wrapper icon-indigo">
+                            <i class="fa-solid fa-user-gear"></i>
+                        </div>
+                        <h3>👤 Profile</h3>
+                        <p>View and manage your personal account information and verification status.</p>
+                        <button type="button" id="dash-card-profile-btn" class="btn-dash-action btn-indigo">
+                            <i class="fa-solid fa-id-card"></i> Profile
+                        </button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 5. MY TRIPS VIEW -->
+            <section id="trips-card" class="card trips-card" style="display: none;">
+                <div class="card-header">
+                    <div class="header-title">
+                        <i class="fa-solid fa-clock-rotate-left icon-badge"></i>
+                        <div>
+                            <h2>My Trips History</h2>
+                            <p>View your saved journey details and estimates</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="showView('dashboard')">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                    </button>
+                </div>
+
+                <div id="trips-history-list">
+                    <!-- Dynamic Trips List / Empty State -->
+                </div>
+            </section>
+
+            <!-- 6. PROFILE VIEW -->
+            <section id="profile-card" class="card profile-card" style="display: none;">
+                <div class="card-header">
+                    <div class="header-title">
+                        <i class="fa-solid fa-user-shield icon-badge"></i>
+                        <div>
+                            <h2>My Profile</h2>
+                            <p>Account verification and user details</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="showView('dashboard')">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                    </button>
+                </div>
+
+                <div class="profile-details-grid">
+                    <div class="profile-item">
+                        <span class="profile-label"><i class="fa-solid fa-user text-emerald"></i> Full Name</span>
+                        <div class="profile-value" id="profile-name-val">Loading...</div>
+                    </div>
+
+                    <div class="profile-item">
+                        <span class="profile-label"><i class="fa-solid fa-envelope text-sky"></i> Email Address</span>
+                        <div class="profile-value" id="profile-email-val">Loading...</div>
+                    </div>
+
+                    <div class="profile-item">
+                        <span class="profile-label"><i class="fa-solid fa-shield-check text-indigo"></i> Account Verification</span>
+                        <div class="profile-value" id="profile-status-val">Loading...</div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ==================================================
+             EXISTING WAYVISTA TRAVEL APPLICATION (PROTECTED)
+             ================================================== -->
+        <div id="main-travel-app" style="display: none;">
+
+            <!-- SECTION 1: TRIP PLANNER -->
+            <section id="planner" class="card planner-card">
+                <div class="card-header">
+                    <div class="header-title">
+                        <i class="fa-solid fa-location-dot icon-badge"></i>
+                        <div>
+                            <h2>Smart Trip Planner</h2>
+                            <p>Enter origin, destination, and departure details</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="travel-form" class="planner-form">
+                    <!-- Travel Mode Selector Buttons -->
+                    <div class="travel-mode-group">
+                        <label><i class="fa-solid fa-route text-sky"></i> Select Travel Mode:</label>
+                        <div class="mode-selector-container">
+                            <button type="button" class="mode-btn active" data-mode="DRIVE">
+                                <span class="mode-emoji">🚗</span>
+                                <span>Car</span>
+                            </button>
+                            <button type="button" class="mode-btn" data-mode="TWO_WHEELER">
+                                <span class="mode-emoji">🏍️</span>
+                                <span>Two-Wheeler</span>
+                            </button>
+                            <button type="button" class="mode-btn" data-mode="TRANSIT">
+                                <span class="mode-emoji">🚌</span>
+                                <span>Transit</span>
+                            </button>
+                            <button type="button" class="mode-btn" data-mode="WALK">
+                                <span class="mode-emoji">🚶</span>
+                                <span>Walk</span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="travel_mode" name="travel_mode" value="DRIVE">
+                    </div>
+
+                    <!-- Locations Grid -->
+                    <div class="form-grid-2">
+                        <div class="input-group">
+                            <div class="input-label-row">
+                                <label for="source"><i class="fa-solid fa-circle-dot text-emerald"></i> From (Origin
+                                    Location)</label>
+                                <button type="button" id="use-current-loc-btn" class="use-location-btn">
+                                    <i class="fa-solid fa-location-crosshairs"></i> 📍 Use Current Location
+                                </button>
+                            </div>
+                            <div class="input-wrapper">
+                                <input type="text" id="source" name="source" placeholder="e.g. Hyderabad" value="Hyderabad"
+                                    required>
+                            </div>
+                            <div id="location-error-msg" class="location-error-badge" style="display: none;"></div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="destination"><i class="fa-solid fa-location-pin text-rose"></i> To (Destination / Place Name)</label>
+                            <div class="input-wrapper search-wrapper">
+                                <input type="text" id="destination" name="destination" placeholder="Search shop, landmark, address..."
+                                    value="Vijayawada" required autocomplete="off">
+                                <button type="button" id="dest-search-btn" class="dest-search-btn" title="Search shop, landmark, address">
+                                    <i class="fa-solid fa-magnifying-glass"></i> Search
+                                </button>
+                            </div>
+                            <!-- Search Results Dropdown -->
+                            <div id="dest-results-dropdown" class="place-results-dropdown" style="display: none;"></div>
+                            <!-- Selected Destination Info Badge -->
+                            <div id="selected-dest-info" class="selected-place-badge" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Departure Time Radio Toggle -->
+                    <div class="input-group" style="margin-top: 0.5rem;">
+                        <label><i class="fa-regular fa-clock text-indigo"></i> Departure Time Option:</label>
+                        <div style="display: flex; gap: 1.5rem; margin-top: 0.25rem;">
+                            <label
+                                style="font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; background: rgba(59, 130, 246, 0.12); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.4);">
+                                <input type="radio" id="dep-now" name="dep_option" value="NOW" checked>
+                                <span>Leave Now (Current Time)</span>
+                            </label>
+                            <label
+                                style="font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.15);">
+                                <input type="radio" id="dep-planned" name="dep_option" value="PLANNED">
+                                <span>Planned Departure</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Planned Date & Time Grid (Hidden when "Leave Now" is selected) -->
+                    <div class="form-grid-2" id="planned-datetime-container" style="display: none;">
+                        <div class="input-group">
+                            <label for="departure_date"><i class="fa-regular fa-calendar text-sky"></i> Departure Date</label>
+                            <input type="date" id="departure_date" name="departure_date">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="departure_time"><i class="fa-regular fa-clock text-amber"></i> Departure Time</label>
+                            <input type="time" id="departure_time" name="departure_time" value="09:00">
+                        </div>
+                    </div>
+
+                    <!-- Traffic Condition Override -->
+                    <div class="input-group">
+                        <label for="traffic_condition"><i class="fa-solid fa-car-side text-amber"></i> Traffic Condition</label>
+                        <select id="traffic_condition" name="traffic_condition">
+                            <option value="Low">Low Traffic</option>
+                            <option value="Moderate" selected>Moderate Traffic</option>
+                            <option value="High">High Traffic</option>
+                            <option value="Severe">Severe Traffic</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary btn-block" id="predict-btn">
+                        <i class="fa-solid fa-paper-plane"></i> Predict My Journey
+                    </button>
+                </form>
+            </section>
+
+            <!-- SECTION 2: LIVE ROUTE & RESULTS -->
+            <section id="live-route" class="results-container">
+                <div class="results-grid">
+
+                    <!-- Primary Route Journey Card -->
+                    <div class="card result-card">
+                        <div class="result-header">
+                            <span class="pill-badge"><i class="fa-solid fa-map-location-dot"></i> Live Journey Route</span>
+                            <div class="title-mode-row">
+                                <h3 id="res-route-title">Hyderabad <i class="fa-solid fa-arrow-right"></i> Vijayawada</h3>
+                                <span class="mode-tag-badge" id="res-mode-badge">🚗 CAR</span>
+                            </div>
+                            <p class="text-muted" id="res-route-subtitle">Real-time road travel duration computed by OSRM Routing Engine</p>
+                        </div>
+
+                        <!-- Primary Hero Box: ROUTE TRAVEL TIME -->
+                        <div class="eta-box google-hero-box">
+                            <div class="eta-label"><i class="fa-solid fa-clock text-sky"></i> ROUTE TRAVEL TIME</div>
+                            <div class="eta-value" id="res-google-duration">-- mins</div>
+                            <div class="eta-subtext">
+                                Departure: <strong id="res-departure-time">--:--</strong> | Estimated Arrival (ETA): <strong id="res-google-eta">--:--</strong>
+                            </div>
+                        </div>
+
+                        <!-- Travel Condition Cards Grid -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <i class="fa-solid fa-road stat-icon icon-blue"></i>
+                                <div>
+                                    <span class="stat-label">ROUTE DISTANCE</span>
+                                    <div class="stat-value" id="res-google-distance">-- km</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <i class="fa-solid fa-cloud-sun stat-icon icon-amber"></i>
+                                <div>
+                                    <span class="stat-label">Weather</span>
+                                    <div class="stat-value" id="res-weather">--</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <i class="fa-solid fa-temperature-three-quarters stat-icon icon-emerald"></i>
+                                <div>
+                                    <span class="stat-label">Temperature</span>
+                                    <div class="stat-value" id="res-temp">-- °C</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <i class="fa-solid fa-car stat-icon icon-rose"></i>
+                                <div>
+                                    <span class="stat-label">ML Traffic Input</span>
+                                    <div class="stat-value" id="res-traffic">--</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <i class="fa-solid fa-highway stat-icon icon-indigo"></i>
+                                <div>
+                                    <span class="stat-label">Route Type</span>
+                                    <div class="stat-value" id="res-route-type">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="route-explainer-note">
+                            <i class="fa-solid fa-circle-info text-sky"></i> <strong>Route Estimate:</strong> Road travel duration returned by OSRM routing engine.
+                        </div>
+
+                        <!-- Start Navigation Action Bar -->
+                        <div class="nav-action-bar" id="nav-action-bar" style="margin-top: 1.25rem;">
+                            <button type="button" id="start-nav-btn" class="btn-navigation btn-block">
+                                <i class="fa-solid fa-compass"></i> 🧭 Start Navigation
+                            </button>
+                        </div>
+
+                        <!-- Navigation Active Mode UI Container -->
+                        <div id="navigation-mode-container" class="nav-active-wrapper" style="display: none; margin-top: 1.25rem;">
+                            <!-- Status Header -->
+                            <div class="nav-status-header">
+                                <div class="nav-active-badge">
+                                    <span class="live-pulse-dot" id="nav-pulse-dot"></span>
+                                    <span id="nav-active-mode-label">🚗 Navigation Active</span>
+                                </div>
+                                <button type="button" id="stop-nav-btn" class="btn-stop-nav">
+                                    <i class="fa-solid fa-circle-stop"></i> ⛔ Stop Navigation
+                                </button>
+                            </div>
+
+                            <!-- GPS Accuracy / Status Notice -->
+                            <div id="nav-gps-alert" class="nav-alert-banner warning" style="display: none;">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span id="nav-gps-alert-text">GPS accuracy is low. Navigation may be approximate.</span>
+                            </div>
+
+                            <!-- Off Route Alert -->
+                            <div id="nav-offroute-alert" class="nav-alert-banner error" style="display: none;">
+                                <i class="fa-solid fa-route fa-spin"></i>
+                                <span id="nav-offroute-alert-text">⚠️ You are off the route. Recalculating route...</span>
+                            </div>
+
+                            <!-- Destination Reached Card -->
+                            <div id="nav-reached-card" class="nav-reached-card" style="display: none;">
+                                <i class="fa-solid fa-flag-checkered icon-reached"></i>
+                                <div>
+                                    <h3 style="margin: 0; color: #10b981; font-size: 1.15rem;">🏁 You have reached your destination.</h3>
+                                    <p style="margin: 0.25rem 0 0 0; color: #94a3b8; font-size: 0.85rem;">Navigation Complete.</p>
+                                </div>
+                            </div>
+
+                            <!-- Turn Guidance Card -->
+                            <div class="nav-turn-card" id="nav-turn-card">
+                                <div class="nav-turn-header">
+                                    <i class="fa-solid fa-compass icon-compass-glow" id="nav-compass-icon"></i>
+                                    <span id="nav-turn-header-title">NEXT MANEUVER</span>
+                                </div>
+                                <div class="nav-instruction-text" id="nav-next-instruction">
+                                    Head toward destination
+                                </div>
+                                <div class="nav-turn-distance" id="nav-next-distance">
+                                    -- m
+                                </div>
+                            </div>
+
+                            <!-- Manual Step Controls when GPS offline/unavailable -->
+                            <div id="nav-step-nav-controls" class="nav-step-controls" style="display: none;">
+                                <button type="button" id="nav-prev-step-btn" class="btn-step-nav" title="Previous Step">
+                                    <i class="fa-solid fa-chevron-left"></i> Prev
+                                </button>
+                                <span id="nav-step-indicator" class="nav-step-indicator">Step 1 of 1</span>
+                                <button type="button" id="nav-next-step-btn" class="btn-step-nav" title="Next Step">
+                                    Next <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+
+                            <!-- Remaining Journey Stats Grid -->
+                            <div class="nav-metrics-grid">
+                                <div class="nav-metric-item">
+                                    <span class="nav-metric-label">Remaining</span>
+                                    <div class="nav-metric-value" id="nav-rem-distance">-- km</div>
+                                </div>
+                                <div class="nav-metric-item">
+                                    <span class="nav-metric-label">Time</span>
+                                    <div class="nav-metric-value" id="nav-rem-time">-- min</div>
+                                </div>
+                                <div class="nav-metric-item">
+                                    <span class="nav-metric-label">ETA</span>
+                                    <div class="nav-metric-value" id="nav-eta">--:--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Turn-by-Turn Route Guidance List -->
+                        <div id="route-directions-container" class="directions-container" style="display: none; margin-top: 1.25rem;">
+                            <div class="directions-header">
+                                <div class="directions-header-title">
+                                    <i class="fa-solid fa-signs-post text-sky"></i>
+                                    <h4>Turn-by-Turn Route Guidance</h4>
+                                </div>
+                                <span class="step-count-badge" id="directions-step-count">0 steps</span>
+                            </div>
+                            <div class="directions-list" id="directions-steps-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Live Route Map Card -->
+                    <div class="card map-card">
+                        <div class="card-header">
+                            <div class="header-title">
+                                <i class="fa-solid fa-map-location-dot icon-badge"></i>
+                                <h3>Live Route Map</h3>
+                            </div>
+                            <span class="route-provider-tag" id="route-provider">OSRM / OpenStreetMap</span>
+                        </div>
+                        <div id="map" class="google-map-container"></div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 4: HOW IT WORKS -->
+            <section id="how-it-works" class="card how-it-works-card">
+                <div class="card-header">
+                    <div class="header-title">
+                        <i class="fa-solid fa-diagram-project icon-badge"></i>
+                        <div>
+                            <h2>How It Works</h2>
+                            <p>Simple 4-step prediction workflow</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-num">1</div>
+                        <h4>Enter Trip Details</h4>
+                        <p>Provide your origin, destination, and departure time.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">2</div>
+                        <h4>Find the Route</h4>
+                        <p>OSRM locates coordinates and calculates exact road distance.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">3</div>
+                        <h4>Check Traffic & Weather</h4>
+                        <p>Open-Meteo API retrieves current temperature and precipitation.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">4</div>
+                        <h4>Predict Travel Time</h4>
+                        <p>Ridge & Lasso models predict travel duration & ETA.</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p><i class="fa-solid fa-graduation-cap"></i> <strong> WayVista — Smart Travel Time Predictor</strong></p>
+            <p class="footer-sub"><a href="/experiments" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem;"><i class="fa-solid fa-flask"></i> ML Experiments & Course Outcomes (CO1–CO6)</a></p>
+        </div>
+    </footer>
+
+    <!-- Leaflet.js Library for OpenStreetMap -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="./js/auth.js?v=1.3.0"></script>
+    <script src="./js/script.js?v=1.3.0"></script>
+</body>
+
+</html>

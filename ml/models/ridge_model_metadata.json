@@ -1,0 +1,32 @@
+{
+  "model_name": "Ridge Regression (L2 Regularization)",
+  "best_alpha": 1.232846739442066,
+  "intercept": 558.1665545724838,
+  "train_mae": 71.2515,
+  "test_mae": 71.4088,
+  "test_mse": 10533.1062,
+  "test_rmse": 102.6309,
+  "train_r2": 0.9623,
+  "test_r2": 0.9662,
+  "training_distance_min_km": 1.23,
+  "training_distance_max_km": 1999.68,
+  "coefficients": {
+    "distance_km": 526.696373283615,
+    "departure_hour": 15.659042616522678,
+    "temperature_c": -1.2328705645935036,
+    "traffic_condition_Low": -96.00218880589459,
+    "traffic_condition_Medium": -3.066394563470688,
+    "traffic_condition_High": 99.068583369738,
+    "weather_Clear": -58.1483769392237,
+    "weather_Cloudy": -35.988307761169175,
+    "weather_Rainy": 25.750726283997288,
+    "weather_Foggy": 68.38595841632568,
+    "day_of_week_Monday": 2.7011243554144193,
+    "day_of_week_Tuesday": -0.7953829682064513,
+    "day_of_week_Wednesday": -4.285831768318974,
+    "day_of_week_Thursday": -6.089582559459966,
+    "day_of_week_Friday": 0.6099827549101122,
+    "day_of_week_Saturday": 0.34674614959685635,
+    "day_of_week_Sunday": 7.512944036066892
+  }
+}

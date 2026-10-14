@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+*.sqlite3
+
+# Environment variables
+.env
+
+# Model artifacts (optional to ignore, but we keep directory structure)
+# ml/saved_models/*.pkl
+
+# IDE & System files
+.vscode/
+.idea/
+.DS_Store
+.gemini/
+
+# Archives & nested duplicate folder
+*.zip
+Project/
+
+# Database & runtime data/logs
+*.db
+*.sqlite
+backend/data/*.db
+backend/data/*.jsonl
+backend/data/feedback_logs.json
+!backend/data/.gitkeep
